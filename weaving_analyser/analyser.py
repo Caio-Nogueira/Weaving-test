@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 from PIL import Image
-from config import console_logger, info_logger,VERTICAL_FOV
+from config import console_logger, info_logger
 import time
 from threading import Thread, Event
 from concurrent.futures import ThreadPoolExecutor
@@ -16,33 +16,55 @@ from camera_handler import CameraHandler
 class WeavingAnalyzer:
 
     def __init__(self) -> None:
-        self.event = Event()
-        self.velocity_handler = VelocityHandler(self.event)
+        self.do_run = False
+        self.velocity_handler = VelocityHandler()
         self.camera_handler = CameraHandler()
-        self.cameraThread = Thread(target=self.handle_cameras,name='camera_thread')
+        
+        self.cameraThread = Thread(target=self.handle_cameras, name='camera_thread')
+        self.velocityThread = Thread(target=self.handle_velocity, name='velocity_thread')
+        
         console_logger.info("WeavingAnalyzer initialized.")
-        self.threadPool = ThreadPoolExecutor(max_workers=2)
+        
+        self.threadPool = ThreadPoolExecutor(max_workers=16)
 
     def start(self) -> None:
-        console_logger.info("Starting velocity handler.")
+        console_logger.info("Starting handlers.")
+        self.do_run = True
         self.velocity_handler.start()
+        self.velocityThread.start()
         self.cameraThread.start()
         
-        time.sleep(10) #*TODO: REMOVE THIS 
+        time.sleep(10) #! PROGRAM RUNS FOR 10 SECONDS 
+        
         self.stop()
         
     
     def stop(self) -> None:
-        console_logger.info("Stopping velocity handler.")
-        self.event.set()
+        console_logger.info("Stopping all handlers.")
+        self.do_run = False
+        self.velocity_handler.stop()
 
+    
+    def handle_velocity(self) -> None:
+        velocity_buffer = []
+        while self.do_run:
+            start_time = time.time()
+            
+            self.velocity_handler.update(velocity_buffer)
+            elapsed_time = time.time() - start_time
+
+            self.threadPool.submit(self.velocity_handler)
+
+            sleep_duration = max(0, 1 / VelocityHandler.SAMPLING_RATE - elapsed_time) # account for the time taken to read the sensor
+            time.sleep(sleep_duration)
+
+    
     def handle_cameras(self) -> None:
         current_frame = 0
-        while self.event.is_set() == False:
-            if (self.velocity_handler.total_displacement / VERTICAL_FOV) > current_frame: # displacement is large enough for a camera iteration
+        while self.do_run:
+            if (self.velocity_handler.total_displacement // CameraHandler.VERTICAL_FOV) > current_frame: # displacement is large enough for a camera iteration
                 current_frame += 1
-                info_logger.info(f"Current frame: {current_frame}")
-                future = self.threadPool.submit(self.camera_handler)
+                future = self.threadPool.submit(lambda: self.camera_handler(self.velocity_handler.velocity, self.velocity_handler.total_displacement))
 
    
 

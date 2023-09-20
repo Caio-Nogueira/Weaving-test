@@ -2,8 +2,9 @@ import time
 
 from threading import Thread
 from typing import List
-from config import debug_logger, warning_logger
+from config import debug_logger, warning_logger, info_logger
 from hardware_controllers.velocity_sensor_controller import VelocitySensorController
+from api import APIhandler
 
 ONE_HERTZ = 1
 
@@ -12,15 +13,18 @@ class VelocityHandler(Thread):
     WINDOW = 5
     total_displacement = 0
 
-    def __init__(self, event) -> None:
+    def __init__(self) -> None:
         super().__init__(name='velocity_handler_thread')
         self._do_run = False
         self.velocity_sensor_controller = VelocitySensorController()
-        self.event = event
         self.total_displacement = 0
+        self.velocity = 0
+        self.api_handler = APIhandler()
 
+    def start(self) -> None:
+        self.velocity_sensor_controller.start_sensor()
+    
     def stop(self) -> None:
-        self._do_run = False
         self.velocity_sensor_controller.stop_sensor()
     
     def handle_velocity(self, velocity_list: List, instant_velocity: int) -> float:
@@ -36,27 +40,20 @@ class VelocityHandler(Thread):
         moving_average_velocity = sum(velocity_list) / len(velocity_list)
         return moving_average_velocity
 
-    def get_displacement(self, velocity: int) -> float:
-        return velocity / VelocityHandler.SAMPLING_RATE
+    def get_displacement(self) -> float:
+        return self.velocity / VelocityHandler.SAMPLING_RATE
     
-    def run(self):
-        self._do_run = True
-        self.velocity_sensor_controller.start_sensor()
-        
-        # create a circular buffer to store the last WINDOW velocities
-        velocity_buffer = []
-        
-        while self.event.is_set() == False:
+    
+    def update(self, velocity_buffer: List):
 
-            start_time = time.time()
-            
-            instant_velocity = self.velocity_sensor_controller.get_velocity()
-            velocity = self.handle_velocity(velocity_buffer, instant_velocity)
-            
-            self.total_displacement += self.get_displacement(velocity)
+        instant_velocity = self.velocity_sensor_controller.get_velocity()
+        self.velocity = self.handle_velocity(velocity_buffer, instant_velocity)
+        self.total_displacement += self.get_displacement()
 
-            elapsed_time = time.time() - start_time
-            sleep_duration = max(0, 1 / VelocityHandler.SAMPLING_RATE - elapsed_time) # account for the time taken to read the sensor
-            debug_logger.debug(f"Total displacement: {self.total_displacement}; Moving average velocity: {velocity}; instant velocity: {instant_velocity}; sleep duration: {sleep_duration}")
+        debug_logger.debug(f"Total displacement: {self.total_displacement}; Moving average velocity: {self.velocity}; instant velocity: {instant_velocity}")
 
-            time.sleep(sleep_duration)
+
+
+    def __call__(self):
+        info_logger.info(f"Sending surface movement request")
+        self.api_handler.send_surface_movement(self.velocity, self.total_displacement)
