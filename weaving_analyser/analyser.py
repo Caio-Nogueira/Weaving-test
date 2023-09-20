@@ -20,11 +20,10 @@ class WeavingAnalyzer:
         self.velocity_handler = VelocityHandler()
         self.camera_handler = CameraHandler()
         
-        self.cameraThread = Thread(target=self.handle_cameras, name='camera_thread')
-        self.velocityThread = Thread(target=self.handle_velocity, name='velocity_thread')
+        self.cameraThread = Thread(target=self.handle_cameras, name='camera_thread', daemon=True)
+        self.velocityThread = Thread(target=self.handle_velocity, name='velocity_thread', daemon=True)
         
         console_logger.info("WeavingAnalyzer initialized.")
-        
         self.threadPool = ThreadPoolExecutor(max_workers=16)
 
     def start(self) -> None:
@@ -66,7 +65,7 @@ class WeavingAnalyzer:
                 current_frame += 1
                 future = self.threadPool.submit(lambda: self.camera_handler(self.velocity_handler.velocity, self.velocity_handler.total_displacement))
 
-   
+
 
 def main() -> None:
     weaving_analyzer = WeavingAnalyzer()

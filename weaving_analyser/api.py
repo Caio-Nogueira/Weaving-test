@@ -2,6 +2,7 @@ import requests
 from typing import List
 import time
 from hardware_controllers.cameras_controller import LightType
+from config import error_logger
 
 light_dict = {
     LightType.GREEN: "green_light",
@@ -12,6 +13,18 @@ class APIhandler():
     def __init__(self):
         self.domain = "127.0.0.1"
         self.port = 5000
+
+        try:
+
+            ping_response = self.ping()
+        except requests.exceptions.ConnectionError as e:
+            error_logger.error(f"API server failed or is not running.")
+            raise Exception(f"API server failed or is not running. ")
+
+    def ping(self):
+        url = f"http://{self.domain}:{self.port}/ping"
+        response = requests.get(url)
+        return response
 
     def prepare_body(self, light, velocity, displacement, light_type):
         return {

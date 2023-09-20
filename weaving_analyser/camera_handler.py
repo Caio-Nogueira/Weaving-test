@@ -7,15 +7,12 @@ class CameraHandler:
     VERTICAL_FOV = 25
 
     def __init__(self) -> None:
-        # super().__init__(name='camera_handler_thread')
         self.cameras_controller = CamerasController()
         self.cameras_controller.open_cameras()
         self.api_handler = APIhandler()
     
-    
 
     def __call__(self, velocity, displacement) -> None:
-        # take pictures with both lights
         
         batch = []
         self.cameras_controller.trigger()

@@ -1,5 +1,3 @@
-import time
-
 from threading import Thread
 from typing import List
 from config import debug_logger, warning_logger, info_logger
@@ -51,7 +49,6 @@ class VelocityHandler(Thread):
         self.total_displacement += self.get_displacement()
 
         debug_logger.debug(f"Total displacement: {self.total_displacement}; Moving average velocity: {self.velocity}; instant velocity: {instant_velocity}")
-
 
 
     def __call__(self):
