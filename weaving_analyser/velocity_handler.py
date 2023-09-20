@@ -7,24 +7,17 @@ from hardware_controllers.velocity_sensor_controller import VelocitySensorContro
 
 ONE_HERTZ = 1
 
-
-class VelocityHandler:
+class VelocityHandler(Thread):
     SAMPLING_RATE = 50 * ONE_HERTZ
     WINDOW = 5
     total_displacement = 0
 
-    def __init__(self) -> None:
+    def __init__(self, event) -> None:
+        super().__init__(name='velocity_handler_thread')
         self._do_run = False
         self.velocity_sensor_controller = VelocitySensorController()
-        self.sampler_thread = Thread(target=self.sampler, name='velocity_sampler_thread')
-
-    def start(self) -> None:
-        self._do_run = True
-        self.velocity_sensor_controller.start_sensor()
-        self.sampler_thread.start()
-
-        time.sleep(5) # work for 5 seconds: TODO remove this line
-        self.stop()
+        self.event = event
+        self.total_displacement = 0
 
     def stop(self) -> None:
         self._do_run = False
@@ -46,13 +39,14 @@ class VelocityHandler:
     def get_displacement(self, velocity: int) -> float:
         return velocity / VelocityHandler.SAMPLING_RATE
     
-    def sampler(self):
-        self.total_displacement = 0
+    def run(self):
+        self._do_run = True
+        self.velocity_sensor_controller.start_sensor()
         
         # create a circular buffer to store the last WINDOW velocities
         velocity_buffer = []
         
-        while self._do_run:
+        while self.event.is_set() == False:
 
             start_time = time.time()
             

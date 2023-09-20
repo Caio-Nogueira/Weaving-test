@@ -1,8 +1,13 @@
 import logging
 
+
+VERTICAL_FOV = 25
+
 # Create separate loggers for debug and warning levels
 debug_logger = logging.getLogger('debug_logger')
 warning_logger = logging.getLogger('warning_logger')
+info_logger = logging.getLogger('info_logger')
+console_logger = logging.getLogger('console_logger')
 
 # Configure the debug logger
 debug_logger.setLevel(logging.DEBUG)
@@ -17,3 +22,17 @@ warning_handler = logging.FileHandler('logs/surface_inspection_warning.log')
 warning_formatter = logging.Formatter('%(asctime)s - %(levelname)s: %(message)s')
 warning_handler.setFormatter(warning_formatter)
 warning_logger.addHandler(warning_handler)
+
+# Configure the info logger
+info_logger.setLevel(logging.INFO)
+info_handler = logging.FileHandler('logs/surface_inspection_info.log')
+info_formatter = logging.Formatter('%(asctime)s - %(levelname)s: %(message)s')
+info_handler.setFormatter(info_formatter)
+info_logger.addHandler(info_handler)
+
+# Configure the console logger
+console_logger.setLevel(logging.INFO)
+console_handler = logging.StreamHandler()
+console_formatter = logging.Formatter('%(asctime)s - %(levelname)s: %(message)s')
+console_handler.setFormatter(console_formatter)
+console_logger.addHandler(console_handler)
