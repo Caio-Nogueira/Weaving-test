@@ -17,6 +17,8 @@ class VelocityHandler:
         Window size for the moving average velocity.
     total_displacement : float
         Total displacement of the fabric (cm).
+    _displacement_threshold : float
+        Threshold for the total displacement (cm).
     _velocity : float
         Current fabric velocity (cm/sec).
     _velocity_sensor_controller : VelocitySensorController
@@ -61,6 +63,7 @@ class VelocityHandler:
         self._do_run = False
         self.velocity_sensor_controller = VelocitySensorController()
         self.total_displacement = 0
+        self.displacement_threshold = 5
         self.velocity = 0
         self.api_handler = APIhandler()
         self.velocity_buffer = []
@@ -156,6 +159,10 @@ class VelocityHandler:
         if len(self.displacement_buffer) > VelocityHandler.WINDOW:
             self.displacement_buffer.pop(0)
         
+        if self.total_displacement > self.displacement_threshold:
+            info_logger.info(f"Total displacement reached: {self.displacement_threshold}")
+            self.displacement_threshold += 5
+
         self.notify_observers()
         debug_logger.debug(f"Total displacement: {self.total_displacement}; Moving average velocity: {self.velocity}; instant velocity: {instant_velocity}")
 

@@ -40,7 +40,7 @@ info_logger.addHandler(info_handler)
 # Configure the console logger
 console_logger.setLevel(logging.INFO)
 console_handler = logging.StreamHandler()
-console_formatter = logging.Formatter('%(asctime)s - %(levelname)s: %(message)s')
+console_formatter = logging.Formatter('%(asctime)s - %(message)s')
 console_handler.setFormatter(console_formatter)
 console_logger.addHandler(console_handler)
 

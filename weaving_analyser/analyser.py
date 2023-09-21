@@ -3,6 +3,7 @@ from .config import console_logger, NUM_OF_WORKERS
 import time
 from threading import Thread
 from concurrent.futures import ThreadPoolExecutor
+from signal import signal, SIGINT
 
 # use the following line to import the hardware_controllers package from the parent directory
 import sys, os
@@ -61,10 +62,11 @@ class WeavingAnalyzer:
         self.updateThread = Thread(target=self.update, name='update_thread', daemon=True)
         
         console_logger.info("WeavingAnalyzer initialized.")
-        self.threadPoolVelocity = ThreadPoolExecutor(max_workers=50)
-        self.threadPoolPictures = ThreadPoolExecutor(max_workers=2)
+        self.threadPoolVelocity = ThreadPoolExecutor(max_workers=50, thread_name_prefix='velocity_thread_')
+        self.threadPoolPictures = ThreadPoolExecutor(max_workers=2, thread_name_prefix='picture_thread_')
         self.current_frame = 0
         
+
 
     def start(self, ttl=None) -> None:
         """
@@ -101,6 +103,10 @@ class WeavingAnalyzer:
         console_logger.info("Stopping all handlers.")
         self.do_run = False
         self.velocity_handler.stop()
+
+        self.threadPoolVelocity.shutdown(wait=False)
+        self.threadPoolPictures.shutdown(wait=False)
+        self.updateThread.join()
 
     
     def update(self) -> None:

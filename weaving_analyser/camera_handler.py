@@ -131,18 +131,20 @@ class CameraHandler(Observer):
             return None
         
         batch.append(self.api_handler.prepare_body(green, velocity, displacement, LightType.GREEN))
+        info_logger.info(f"velocity: {velocity}, displacement: {displacement} after green picture.")
         debug_logger.debug(f"Green picture collected.")
         
         blue = self.trigger_camera(LightType.BLUE)
         debug_logger.debug(f"Blue picture collected.")
         self.camera_lock.release()
         velocity, displacement = self.velocity, self.displacement
-        info_logger.info("Sending batch request.")
 
         if blue is None:
             return None
 
+        
         batch.append(self.api_handler.prepare_body(blue, velocity, displacement, LightType.BLUE))
+        info_logger.info(f"velocity: {velocity}, displacement: {displacement} after blue picture.")
         return batch
 
 
@@ -155,6 +157,10 @@ class CameraHandler(Observer):
         """
 
         batch = self.make_batch()
+        
+        console_logger.info(f"Sending batch of pictures to API.")
+        info_logger.info("Sending batch request to API.")
+        
         response = self.api_handler.send_pictures_batch(batch)
         return response
 
