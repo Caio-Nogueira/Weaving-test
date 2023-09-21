@@ -13,8 +13,46 @@ from .camera_handler import CameraHandler
 
     
 class WeavingAnalyzer:
+    """
+    WeavingAnalyzer is a class that handles the velocity and camera handlers.
+    
+    Attributes
+    ----------
+    velocity_handler : VelocityHandler
+        Instance of the velocity handler.
+    camera_handler : CameraHandler
+        Instance of the camera handler.
+    updateThread : Thread
+        Thread that updates the velocity handler.
+    threadPoolVelocity : ThreadPoolExecutor
+        Thread pool for the velocity handler.
+    threadPoolPictures : ThreadPoolExecutor
+        Thread pool for the camera handler.
+    _current_frame : int
+        Current frame number.
+    do_run : bool
+        Whether the WeavingAnalyzer should run or not.
+
+    Methods
+    -------
+    start(ttl: int)
+        Start the WeavingAnalyzer.
+    stop()
+        Stop the WeavingAnalyzer.
+    update()
+        Update the velocity and camera handlers.
+        
+    """
 
     def __init__(self) -> None:
+        """
+        Initialize the WeavingAnalyzer.
+
+        Returns
+        -------
+        None
+        """
+
         self.do_run = False
         self.velocity_handler = VelocityHandler()
         self.camera_handler = CameraHandler()
@@ -25,11 +63,21 @@ class WeavingAnalyzer:
         console_logger.info("WeavingAnalyzer initialized.")
         self.threadPoolVelocity = ThreadPoolExecutor(max_workers=50)
         self.threadPoolPictures = ThreadPoolExecutor(max_workers=2)
-
         self.current_frame = 0
         
 
     def start(self, ttl=None) -> None:
+        """
+        Start the WeavingAnalyzer.
+
+        Args:
+            ttl (int, optional): time to live. Defaults to None.
+
+        Returns
+        -------
+        None
+        """
+
         console_logger.info("Starting handlers.")
         self.do_run = True
         self.velocity_handler.start()
@@ -42,20 +90,34 @@ class WeavingAnalyzer:
         
         
     def stop(self) -> None:
+        """
+        Stop the WeavingAnalyzer.
+
+        Returns
+        -------
+        None
+        """
+
         console_logger.info("Stopping all handlers.")
         self.do_run = False
         self.velocity_handler.stop()
 
     
     def update(self) -> None:
-        
+        """
+        Update the velocity and camera handlers.
+
+        Returns
+        -------
+        None
+        """
+
         while self.do_run:
             start_time = time.time()
             
             self.velocity_handler.update()
 
             self.threadPoolVelocity.submit(self.velocity_handler)
-            
             avg_total_disp = sum(self.velocity_handler.displacement_buffer) / len(self.velocity_handler.displacement_buffer)
             if (avg_total_disp // CameraHandler.VERTICAL_FOV) > self.current_frame: # displacement is large enough for a camera iteration
                 self.current_frame += 1

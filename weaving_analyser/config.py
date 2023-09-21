@@ -1,6 +1,13 @@
 import logging
+from hardware_controllers.cameras_controller import LightType
 
 NUM_OF_WORKERS = 64
+
+light_dict = {
+    LightType.GREEN: "green_light",
+    LightType.BLUE: "blue_light"
+}
+
 
 # Create separate loggers for debug and warning levels
 debug_logger = logging.getLogger('debug_logger')
