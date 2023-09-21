@@ -1,5 +1,7 @@
 import logging
 
+NUM_OF_WORKERS = 64
+
 # Create separate loggers for debug and warning levels
 debug_logger = logging.getLogger('debug_logger')
 warning_logger = logging.getLogger('warning_logger')

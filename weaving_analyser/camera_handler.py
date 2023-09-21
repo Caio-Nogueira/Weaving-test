@@ -1,32 +1,35 @@
 from hardware_controllers.cameras_controller import CamerasController, LightType
 
-from config import info_logger
-from api import APIhandler
+from .config import info_logger
+from .api import APIhandler
 
 class CameraHandler:
     VERTICAL_FOV = 25
 
     def __init__(self) -> None:
         self.cameras_controller = CamerasController()
-        self.cameras_controller.open_cameras()
+        self.cameras_controller.open_cameras() # TODO: CATCH SENSOR EXCEPTIONS
         self.api_handler = APIhandler()
     
 
     def __call__(self, velocity, displacement) -> None:
         
+        # TODO: REFACTOR THIS -> create a method that returns an individual picture given a light type
         batch = []
-        self.cameras_controller.trigger()
+        self.cameras_controller.trigger() # TODO: CATCH SENSOR EXCEPTIONS
         green_pictures = self.cameras_controller.collect_pictures(LightType.GREEN)
 
         batch.append(self.api_handler.prepare_body(green_pictures, velocity, displacement, LightType.GREEN))
         
-        self.cameras_controller.trigger()
+        self.cameras_controller.trigger() # TODO: CATCH SENSOR EXCEPTIONS
         blue_pictures = self.cameras_controller.collect_pictures(LightType.BLUE)
+
+        # TODO: RAISE EXCEPTION IF BATCH IS NOT FULL
 
         batch.append(self.api_handler.prepare_body(blue_pictures, velocity, displacement, LightType.BLUE))
         info_logger.info(f"Sending batch request")
 
-        response = self.api_handler.send_pictures_batch({"lights": batch})
+        response = self.api_handler.send_pictures_batch(batch)
         return response
 
 
