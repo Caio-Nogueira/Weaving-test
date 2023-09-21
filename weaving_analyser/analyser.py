@@ -18,11 +18,13 @@ class WeavingAnalyzer:
         self.do_run = False
         self.velocity_handler = VelocityHandler()
         self.camera_handler = CameraHandler()
-        self.velocityThread = Thread(target=self.handle_velocity, name='velocity_thread')
+        
+        self.velocity_handler.register_observer(self.camera_handler)
+        self.updateThread = Thread(target=self.update, name='update_thread', daemon=True)
         
         console_logger.info("WeavingAnalyzer initialized.")
         self.threadPoolVelocity = ThreadPoolExecutor(max_workers=50)
-        self.threadPoolPictures = ThreadPoolExecutor(max_workers=16)
+        self.threadPoolPictures = ThreadPoolExecutor(max_workers=2)
 
         self.current_frame = 0
         
@@ -31,7 +33,8 @@ class WeavingAnalyzer:
         console_logger.info("Starting handlers.")
         self.do_run = True
         self.velocity_handler.start()
-        self.velocityThread.start()
+        self.camera_handler.start()
+        self.updateThread.start()
         
         if ttl is not None:
             time.sleep(ttl) 
@@ -44,7 +47,7 @@ class WeavingAnalyzer:
         self.velocity_handler.stop()
 
     
-    def handle_velocity(self) -> None:
+    def update(self) -> None:
         
         while self.do_run:
             start_time = time.time()
@@ -56,18 +59,8 @@ class WeavingAnalyzer:
             avg_total_disp = sum(self.velocity_handler.displacement_buffer) / len(self.velocity_handler.displacement_buffer)
             if (avg_total_disp // CameraHandler.VERTICAL_FOV) > self.current_frame: # displacement is large enough for a camera iteration
                 self.current_frame += 1
-                self.threadPoolPictures.submit(lambda: self.camera_handler(self.velocity_handler.velocity, self.velocity_handler.total_displacement))
+                self.threadPoolPictures.submit(lambda: self.camera_handler())
 
             elapsed_time = time.time() - start_time
             sleep_duration = max(0, 1 / VelocityHandler.SAMPLING_RATE - elapsed_time) # account for the time taken to read the sensor
             time.sleep(sleep_duration)
-
-
-
-# def main() -> None:
-#     weaving_analyzer = WeavingAnalyzer()
-#     weaving_analyzer.start()
-
-
-# if __name__ == '__main__':
-#     main()

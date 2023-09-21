@@ -17,7 +17,14 @@ class VelocityHandler:
         self.api_handler = APIhandler()
         self.velocity_buffer = []
         self.displacement_buffer = []
+        self.observers = []
 
+    def register_observer(self, observer):
+        self.observers.append(observer)
+
+    def notify_observers(self):
+        for observer in self.observers:
+            observer.update(self.velocity, self.total_displacement)
 
     def start(self) -> None:
         self.velocity_sensor_controller.start_sensor()
@@ -44,16 +51,18 @@ class VelocityHandler:
     
     
     def update(self):
-
-        instant_velocity = self.velocity_sensor_controller.get_velocity() # TODO: CATCH SENSOR EXCEPTIONS
+        instant_velocity = self.velocity_sensor_controller.get_velocity() / 60 # convert from cm/min to cm/sec
         self.velocity = self.handle_velocity(instant_velocity)
+
+
         
         self.total_displacement += self.get_displacement()
         self.displacement_buffer.append(self.total_displacement)
 
         if len(self.displacement_buffer) > VelocityHandler.WINDOW:
             self.displacement_buffer.pop(0)
-            
+        
+        self.notify_observers()
         debug_logger.debug(f"Total displacement: {self.total_displacement}; Moving average velocity: {self.velocity}; instant velocity: {instant_velocity}")
 
 

@@ -4,6 +4,7 @@ import time
 from hardware_controllers.cameras_controller import LightType
 from .config import error_logger, debug_logger
 import base64
+import numpy as np
 
 light_dict = {
     LightType.GREEN: "green_light",
@@ -26,11 +27,11 @@ class APIhandler:
         response = requests.get(url)
         return response
     
-    def encode_image(self, image):
+    def encode_image(self, image: np.ndarray):
         return base64.b64encode(image)
 
 
-    def prepare_body(self, light, velocity, displacement, light_type):
+    def prepare_body(self, light: np.ndarray, velocity: float, displacement: float, light_type: LightType):
 
         return {
             "light": light_dict[light_type],
@@ -70,6 +71,6 @@ class APIhandler:
         return response
     
     def send_surface_movement(self, velocity: float, displacement: float):
-        url = f"http://{self.domain}:{self.port}/surface_movement"
+        url = f"http://{self.domain}:{self.port}/fabric_movement"
         response = requests.post(url, data=self.surface_movement_body(velocity, displacement))
         return response

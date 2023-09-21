@@ -20,10 +20,10 @@ class TestCameraHandler(unittest.TestCase):
         self.camera_handler.api_handler = mock_api_handler
         mock_api_handler.prepare_body.return_value = 'body'
         mock_cameras_controller.collect_pictures.return_value = 'picture'
-        self.assertEqual(self.camera_handler.make_batch(10, 10), ['body', 'body'])
+        self.assertEqual(self.camera_handler.make_batch(), ['body', 'body'])
 
     @patch('hardware_controllers.cameras_controller.CamerasController')
     def test_trigger_fail(self, mock_cameras_controller):
         self.camera_handler.cameras_controller = mock_cameras_controller
         mock_cameras_controller.trigger.return_value = False
-        self.assertEqual(self.camera_handler.make_batch(10, 10), None)
+        self.assertEqual(self.camera_handler.make_batch(), None)

@@ -20,7 +20,7 @@ class TestVelocityHandler(unittest.TestCase):
     @patch('hardware_controllers.velocity_sensor_controller.VelocitySensorController')
     def test_update(self, mock_velocity_sensor_controller):
         self.velocity_handler.velocity_sensor_controller = mock_velocity_sensor_controller
-        mock_velocity_sensor_controller.get_velocity.return_value = 10
+        mock_velocity_sensor_controller.get_velocity.return_value = 60
         self.velocity_handler.update()
-        self.assertEqual(self.velocity_handler.velocity, 10)
-        self.assertEqual(self.velocity_handler.total_displacement, 0.2)
+        self.assertEqual(self.velocity_handler.velocity, 1)
+        self.assertEqual(self.velocity_handler.total_displacement, 0.02)
