@@ -10,7 +10,7 @@ light_dict = {
     LightType.BLUE: "blue_light"
 }
 
-class APIhandler():
+class APIhandler:
     def __init__(self):
         self.domain = "127.0.0.1"
         self.port = 5000
@@ -27,7 +27,6 @@ class APIhandler():
         return response
     
     def encode_image(self, image):
-        # encode image to base64
         return base64.b64encode(image)
 
 
@@ -56,13 +55,13 @@ class APIhandler():
                 }
         }
     
-    def surface_movement_body(velocity, displacement):
+    def surface_movement_body(self, velocity: float, displacement: float):
         return {
             "velocity": velocity,
             "displacement": displacement
         }
 
-    def send_pictures_batch(self, pictures_batch):
+    def send_pictures_batch(self, pictures_batch: List):
         url = f"http://{self.domain}:{self.port}/pictures_batch"
         data = {
             "lights": pictures_batch
@@ -70,7 +69,7 @@ class APIhandler():
         response = requests.post(url, data=data)
         return response
     
-    def send_surface_movement(self, velocity, displacement):
+    def send_surface_movement(self, velocity: float, displacement: float):
         url = f"http://{self.domain}:{self.port}/surface_movement"
         response = requests.post(url, data=self.surface_movement_body(velocity, displacement))
         return response

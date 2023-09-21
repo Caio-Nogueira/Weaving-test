@@ -1,5 +1,4 @@
 #! /usr/bin/env python3
-from PIL import Image
 from .config import console_logger, NUM_OF_WORKERS
 import time
 from threading import Thread
@@ -28,13 +27,13 @@ class WeavingAnalyzer:
         self.current_frame = 0
         
 
-    def start(self, ttl: int) -> None:
+    def start(self, ttl=None) -> None:
         console_logger.info("Starting handlers.")
         self.do_run = True
         self.velocity_handler.start()
         self.velocityThread.start()
         
-        if ttl:
+        if ttl is not None:
             time.sleep(ttl) 
             self.stop()
         
@@ -65,10 +64,10 @@ class WeavingAnalyzer:
 
 
 
-def main() -> None:
-    weaving_analyzer = WeavingAnalyzer()
-    weaving_analyzer.start()
+# def main() -> None:
+#     weaving_analyzer = WeavingAnalyzer()
+#     weaving_analyzer.start()
 
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()

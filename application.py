@@ -14,6 +14,9 @@ def main() -> None:
         ttl = int(sys.argv[2])
         weaving_analyzer.start(ttl)
 
+    else:
+        weaving_analyzer.start()
+
 
 if __name__ == '__main__':
     main()

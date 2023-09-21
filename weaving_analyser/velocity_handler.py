@@ -1,18 +1,15 @@
-from threading import Thread
-from typing import List
 from .config import debug_logger, warning_logger, info_logger
 from hardware_controllers.velocity_sensor_controller import VelocitySensorController
 from .api import APIhandler
 
 ONE_HERTZ = 1
 
-class VelocityHandler(Thread):
+class VelocityHandler:
     SAMPLING_RATE = 50 * ONE_HERTZ
     WINDOW = 5
     total_displacement = 0
 
     def __init__(self) -> None:
-        super().__init__(name='velocity_handler_thread')
         self._do_run = False
         self.velocity_sensor_controller = VelocitySensorController()
         self.total_displacement = 0
@@ -28,7 +25,7 @@ class VelocityHandler(Thread):
     def stop(self) -> None:
         self.velocity_sensor_controller.stop_sensor()
     
-    def handle_velocity(self, instant_velocity: int) -> float:
+    def handle_velocity(self, instant_velocity: float) -> float:
         # address noise in velocity readings by calculating the moving average velocity
         if instant_velocity < 0:
             warning_logger.warning(f"Negative velocity detected: {instant_velocity}")
@@ -50,6 +47,7 @@ class VelocityHandler(Thread):
 
         instant_velocity = self.velocity_sensor_controller.get_velocity() # TODO: CATCH SENSOR EXCEPTIONS
         self.velocity = self.handle_velocity(instant_velocity)
+        
         self.total_displacement += self.get_displacement()
         self.displacement_buffer.append(self.total_displacement)
 
@@ -60,5 +58,4 @@ class VelocityHandler(Thread):
 
 
     def __call__(self):
-        # info_logger.info(f"Sending surface movement request: velocity: {self.velocity}, displacement: {self.total_displacement}")
         self.api_handler.send_surface_movement(self.velocity, self.total_displacement)
