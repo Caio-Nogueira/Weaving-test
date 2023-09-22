@@ -4,7 +4,6 @@
 
 This project consists of a simple weaving analyser application, leveraging firmware interface to simulate a real environment. Te program gets images (from simulated camera controllers) and surface velocity (from simulated velocity controllers), and sends them to a server for data analysis.
 
-## 
 
 ## Usage
 
