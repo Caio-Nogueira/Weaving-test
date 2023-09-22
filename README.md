@@ -1,10 +1,14 @@
 # Weaving Analyser Test
 
-This project consists of a simple weaving analyser application, leveraging firmware interface to simulate a real environment. Te program gets images (from simulated camera controllers) and surface velocity (from simulated velocity controllers), and sends them to a server for data analysis. 
+
+
+This project consists of a simple weaving analyser application, leveraging a firmware interface to simulate a real environment. The program gets images (from simulated camera controllers) and surface velocity (from simulated velocity controllers), and sends them to a server for data analysis. The specification is available [here](https://github.com/Caio-Nogueira/Weaving-test/blob/main/Specification.md).
+
+
 
 ## Usage
 
-There is no need to install additional dependencies that did not exist in the template. As such, to run the application make sure to run the server first with the following command (in the root of the directory):
+There is no need to install additional dependencies that did not exist in the template. As such, to run the application, make sure to run the server first with the following command (in the root of the directory):
 
 ```shell
 python3 server/server.py
