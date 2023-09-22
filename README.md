@@ -1,10 +1,6 @@
 # Weaving Analyser Test
 
-
-
-This project consists of a simple weaving analyser application, leveraging firmware interface to simulate a real environment. Te program gets images (from simulated camera controllers) and surface velocity (from simulated velocity controllers), and sends them to a server for data analysis.
-
-## 
+This project consists of a simple weaving analyser application, leveraging firmware interface to simulate a real environment. Te program gets images (from simulated camera controllers) and surface velocity (from simulated velocity controllers), and sends them to a server for data analysis. 
 
 ## Usage
 
@@ -14,15 +10,15 @@ There is no need to install additional dependencies that did not exist in the te
 python3 server/server.py
 ```
 
-
-
-With the server up and running, you can run the application:
+With the server up and running, you can run the application. It is possible to determine a `ttl` so that the program terminates after the given amount of time.
 
 ```shell
 python3 weaving_analyser/application.py
 ```
 
-
+```shell
+python3 weaving_analyser/application.py -t <n_seconds>
+```
 
 Finally, to run all unit tests, use the following command:
 
@@ -54,6 +50,4 @@ weaving-test-master/
 |-- README.md
 |-- Specification.md
 |-- ...
-
-
 ```

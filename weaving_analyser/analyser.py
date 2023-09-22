@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-from .config import console_logger, NUM_OF_WORKERS
+from .config import console_logger
 import time
 from threading import Thread
 from concurrent.futures import ThreadPoolExecutor
@@ -13,9 +13,9 @@ from .velocity_handler import VelocityHandler
 from .camera_handler import CameraHandler
 
     
-class WeavingAnalyzer:
+class WeavingAnalyser:
     """
-    WeavingAnalyzer is a class that handles the velocity and camera handlers.
+    WeavingAnalyser is a class that handles the velocity and camera handlers.
     
     Attributes
     ----------
@@ -32,14 +32,14 @@ class WeavingAnalyzer:
     _current_frame : int
         Current frame number.
     do_run : bool
-        Whether the WeavingAnalyzer should run or not.
+        Whether the WeavingAnalyser should run or not.
 
     Methods
     -------
     start(ttl: int)
-        Start the WeavingAnalyzer.
+        Start the WeavingAnalyser.
     stop()
-        Stop the WeavingAnalyzer.
+        Stop the WeavingAnalyser.
     update()
         Update the velocity and camera handlers.
         
@@ -47,7 +47,7 @@ class WeavingAnalyzer:
 
     def __init__(self) -> None:
         """
-        Initialize the WeavingAnalyzer.
+        Initialize the WeavingAnalyser.
 
         Returns
         -------
@@ -61,7 +61,7 @@ class WeavingAnalyzer:
         self.velocity_handler.register_observer(self.camera_handler)
         self.updateThread = Thread(target=self.update, name='update_thread', daemon=True)
         
-        console_logger.info("WeavingAnalyzer initialized.")
+        console_logger.info("WeavingAnalyser initialized.")
         self.threadPoolVelocity = ThreadPoolExecutor(max_workers=50, thread_name_prefix='velocity_thread_')
         self.threadPoolPictures = ThreadPoolExecutor(max_workers=2, thread_name_prefix='picture_thread_')
         self.current_frame = 0
@@ -70,7 +70,7 @@ class WeavingAnalyzer:
 
     def start(self, ttl=None) -> None:
         """
-        Start the WeavingAnalyzer.
+        Start the WeavingAnalyser.
 
         Args:
             ttl (int, optional): time to live. Defaults to None.
@@ -81,6 +81,9 @@ class WeavingAnalyzer:
         """
 
         console_logger.info("Starting handlers.")
+        
+        signal(SIGINT, self.stop) # ends the program when ctrl+c is pressed
+        
         self.do_run = True
         self.velocity_handler.start()
         self.camera_handler.start()
@@ -93,7 +96,7 @@ class WeavingAnalyzer:
         
     def stop(self) -> None:
         """
-        Stop the WeavingAnalyzer.
+        Stop the WeavingAnalyser.
 
         Returns
         -------
@@ -127,7 +130,7 @@ class WeavingAnalyzer:
             avg_total_disp = sum(self.velocity_handler.displacement_buffer) / len(self.velocity_handler.displacement_buffer)
             if (avg_total_disp // CameraHandler.VERTICAL_FOV) > self.current_frame: # displacement is large enough for a camera iteration
                 self.current_frame += 1
-                self.threadPoolPictures.submit(lambda: self.camera_handler())
+                self.threadPoolPictures.submit(self.camera_handler)
 
             elapsed_time = time.time() - start_time
             sleep_duration = max(0, 1 / VelocityHandler.SAMPLING_RATE - elapsed_time) # account for the time taken to read the sensor

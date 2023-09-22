@@ -137,6 +137,7 @@ class CameraHandler(Observer):
         blue = self.trigger_camera(LightType.BLUE)
         debug_logger.debug(f"Blue picture collected.")
         self.camera_lock.release()
+        info_logger.info(f"Displacement between pictures: {self.displacement - displacement}, ")
         velocity, displacement = self.velocity, self.displacement
 
         if blue is None:
@@ -144,7 +145,6 @@ class CameraHandler(Observer):
 
         
         batch.append(self.api_handler.prepare_body(blue, velocity, displacement, LightType.BLUE))
-        info_logger.info(f"velocity: {velocity}, displacement: {displacement} after blue picture.")
         return batch
 
 

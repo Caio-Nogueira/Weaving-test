@@ -1,4 +1,4 @@
-from weaving_analyser.analyser import WeavingAnalyzer
+from weaving_analyser.analyser import WeavingAnalyser
 import sys
 import requests
 from weaving_analyser.api import APIhandler
@@ -6,7 +6,7 @@ from weaving_analyser.api import APIhandler
 #* usage: python application.py --ttl xx
 
 def main() -> None:
-    weaving_analyzer = WeavingAnalyzer()
+    weaving_analyzer = WeavingAnalyser()
     api_handler = APIhandler()
 
     try:
@@ -19,17 +19,17 @@ def main() -> None:
     
     num_args = len(sys.argv)
     ttl = None
-    if num_args >= 3:
+    
+    if num_args >= 3 and (sys.argv[1] == "--ttl" or sys.argv[1] == "-t"):
         try:
             ttl = int(sys.argv[2])
         except ValueError:
-            print("Invalid ttl value.\n usage: python application.py --ttl <n_seconds>")
+            print("Invalid ttl value.\n usage: python application.py --t <n_seconds>")
             return
 
-    try:
-        weaving_analyzer.start(ttl)
-    except KeyboardInterrupt:
-        weaving_analyzer.stop()
+
+    weaving_analyzer.start(ttl)
+
 
 
 if __name__ == '__main__':
